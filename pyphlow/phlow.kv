@@ -1,0 +1,40 @@
+#:kivy 1.0
+#:import win kivy.core.window
+
+<PhlowWidget>:
+    img: img
+    size: 300, 300
+    canvas:
+        Color:
+            rgb: self.background_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    RotatableImage:
+        canvas.before:
+            PushMatrix
+            Rotate:
+                angle: self.angle
+                axis: 0, 0, 1
+                origin: root.center
+            Scale:
+                origin: root.center
+                x: self.scale_factor
+                y: self.scale_factor
+        canvas.after:
+            PopMatrix
+        id: img
+        center: root.center
+        height: (win.Window.height - ext.height * 2)
+        width: win.Window.width
+        source: root.source
+        nocache: True
+    Label:
+        id: ext
+        text: root.extensions
+        size: self.texture_size
+        top: root.top
+    Label:
+        y: root.y
+        size: self.texture_size
+        text: "x reject all, c keep jpg, v keep all"
