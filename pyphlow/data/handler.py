@@ -1,5 +1,6 @@
 import os
 from collections import deque
+from functools import lru_cache
 from typing import Optional, Deque, Container, Union
 
 from PIL import ExifTags
@@ -65,9 +66,9 @@ class Picture:
             raise FileNotFoundError(
                 f"{name}.JPG does not exist and can not be generated!")
 
-        self._angle: int = self._get_angle()
-
-    def _get_angle(self) -> int:
+    @staticmethod
+    @lru_cache()
+    def _get_angle(path) -> int:
         # TODO: Maybe replace exif reading?
         """
         from PIL import Image
@@ -87,7 +88,7 @@ class Picture:
         """
 
         angle = 0
-        with PILImage.open(self.preview_path) as img:
+        with PILImage.open(path) as img:
             # Often, the picture is not rotated correctly.
             # The correct orientation is
             # written to the Exif metadata by the camera.
@@ -158,7 +159,7 @@ class Picture:
 
     @property
     def angle(self):
-        return self._angle
+        return self._get_angle(self.preview_path)
 
     @property
     def exists(self):
