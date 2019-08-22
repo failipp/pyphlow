@@ -232,7 +232,7 @@ class PictureHandler:
 
         remove_pictures(self._basepath)
 
-        # os.remove(os.path.join(self._basepath, 'rejected.txt'))
+        os.remove(os.path.join(self._basepath, 'rejected.txt'))
 
         self._pictures = self._parse()
         self._current = None
