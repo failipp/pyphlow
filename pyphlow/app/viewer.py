@@ -9,7 +9,6 @@ from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
 from kivy.uix.widget import Widget
 
-# from pyphlow.data.handler import TEST_PATH, Picture, PictureHandler
 from pyphlow.data.picturehandling import (Mode, Picture, PictureManager,
                                           get_picture_angle)
 
@@ -111,11 +110,7 @@ class PhlowViewer(Widget):
 
         self._picture_manager = PictureManager(self._path, self.mode)
 
-        # self._picture_handler = PictureHandler(path)
-        # self._current_picture: Picture = self._picture_handler.next
         self._current_picture: Picture = self._picture_manager.current_picture
-
-        # self.source = self._current_picture.preview_path
 
     def _on_key_down(self, keyboard, keycode, text, modifiers):
         key = keycode[1]
@@ -182,17 +177,7 @@ class PhlowViewer(Widget):
 
         self.picture_info = self._current_picture.name
 
-        # self.img.angle = self._current_picture.angle
         print(getattr(self.img, 'angle', 0), "winkel")
-        # self.rejected = any((self._current_picture._reject_raw,
-        #                      self._current_picture._reject_jpg))
-        # if self._current_picture._reject_raw:
-        # if self._current_picture._reject_jpg:
-        # self.background_color = RED
-        # else:
-        # self.background_color = YELLOW
-        # else:
-        # self.background_color = GREY
 
 
 class RotatableImage(Image):
