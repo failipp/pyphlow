@@ -1,0 +1,95 @@
+#:kivy 1.0
+#:import win kivy.core.window
+
+<ViewScreen>:
+    viewer: main
+    PhlowViewer:
+        id: main
+        size: root.size
+        _path: app._path
+
+<PhlowViewer>:
+    img: img
+    ext: ext
+    # size: 300, 300
+    canvas:
+        Color:
+            rgb: (.3, .3, .3) if not self.action else (.15, .15, .15)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Label:
+        center: root.center
+        text: "Image preview not possible"
+    Widget:
+        id: idk
+        height: win.Window.height - top_bar.height
+        width: win.Window.width
+        RotatableImage:
+            id: img
+            size: self.parent.size
+            center_x: self.parent.x + self.parent.width / 2 + self.offset_x
+            # center_x: self.parent.center_x
+            center_y: self.parent.y + self.parent.height / 2 + self.offset_y
+            # center_y: self.parent.center_y
+            source: root.source
+            nocache: True
+    Widget:
+        id: top_bar
+        canvas.before:
+            Color:
+                rgb: .1, .1, .1
+            Rectangle:
+                pos: self.pos
+                size: root.width, self.height
+        top: root.top
+        height: mode.height * 1.5
+        Label:
+            id: ext
+            text: root.picture_info
+            size: self.texture_size
+            center_y: self.parent.center_y
+            x: mode.height
+        Label:
+            id: mode
+            text: root.mode_str
+            size: self.texture_size
+            center_y: self.parent.center_y
+            x: root.width - self.height - self.width
+    Label:
+        canvas.before:
+            Color:
+                rgba: (.2, .2, .2, .85) 
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        text: root.action
+        font_size: 20
+        height: 1.5 * self.texture_size[1]
+        width: self.texture_size[0] + self.texture_size[1]
+        x: root.width - self.width
+    # Label:
+        # canvas.before:
+            # Color:
+                # rgb: 0, 0, 0
+            # Rectangle:
+                # pos: self.pos
+                # size: root.width, self.height
+        # y: root.y
+        # size: self.texture_size
+        # text: "x reject all, c keep jpg, v keep all"
+
+<RotatableImage>:
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: self.angle
+            axis: 0, 0, 1
+            origin: root.center
+        Scale:
+            origin: root.center
+            x: self.scale_factor
+            y: self.scale_factor
+    canvas.after:
+        PopMatrix
+    allow_stretch: False

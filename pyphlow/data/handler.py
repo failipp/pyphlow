@@ -1,7 +1,9 @@
 import os
+import shlex
+import subprocess
 from collections import deque
 from functools import lru_cache
-from typing import Optional, Deque, Container, Union
+from typing import Container, Deque, Optional, Union
 
 from PIL import ExifTags
 from PIL import Image as PILImage
@@ -19,7 +21,6 @@ class Picture:
     For one Picture there must be a .jpg file. There also can be an exported
     .jpg file, a raw file and an .xmp darktable file.
     """
-
     def __init__(self, basepath, name, **kwargs):
         self._name = name
         self._basepath = basepath
@@ -46,14 +47,21 @@ class Picture:
             if os.path.exists(os.path.join(basepath, f"{self._raw}.xmp")):
                 self._darktable_file = f"{self._raw}.xmp"
 
-        """
         if self._raw and not self._jpg:
             print(f"Generating JPG file {name}.JPG")
-            with rawpy.imread(os.path.join(basepath, self._raw))as raw:
-                rgb = raw.postprocess()
-            self._jpg = f"1jpg/{name}.JPG"
-            imageio.imsave(os.path.join(basepath, self._jpg), rgb)
-            """
+            jpg_in_raw_dir = f"1raw/{name}.JPG"
+            cmd = shlex.split(
+                f'exiftool -b -PreviewImage -w .JPG '
+                f'"{os.path.join(basepath, self._raw)}" -execute '
+                f'-overwrite_original -tagsfromfile "%d%f.ARW" -Orientation'
+                f' "{os.path.join(basepath, jpg_in_raw_dir)}"')
+            p = subprocess.Popen(cmd, stdout=subprocess.DEVNULL)
+            p.communicate()
+            if os.path.exists(os.path.join(basepath, jpg_in_raw_dir)):
+                print(f"Successful generation of {name}.JPG")
+                self._jpg = f"1jpg/{name}.JPG"
+                os.rename(os.path.join(basepath, jpg_in_raw_dir),
+                          os.path.join(basepath, self._jpg))
 
         self._show_export = True
         if os.path.exists(os.path.join(basepath, f"3export/{name}.JPG")):
@@ -193,7 +201,6 @@ class PictureHandler:
     """
     Parse the directory, generate Pictures and manage them.
     """
-
     def __init__(self, basepath: Union[str, None] = None, **kwargs):
         basepath = os.path.abspath(basepath)
 
