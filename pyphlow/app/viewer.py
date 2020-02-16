@@ -175,7 +175,8 @@ class PhlowViewer(Widget):
     def on_source(self, obj, value):
         print(self.source.split("/")[-1], self._current_picture.name)
 
-        self.picture_info = self._current_picture.name
+        is_public = " - public" if self._current_picture.is_public else ""
+        self.picture_info = self._current_picture.name + is_public
 
         print(getattr(self.img, 'angle', 0), "winkel")
 

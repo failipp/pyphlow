@@ -15,12 +15,14 @@ class FalseDirContentError(Exception):
 
 
 class Picture:
-    def __init__(self, name: str, preview: str, mode: Mode):
+    def __init__(self, name: str, preview: str, mode: Mode, **kwargs):
         self._name = name
         self._preview = preview
         self._mode = mode
 
         self._action = None
+
+        self._is_public = kwargs.get('is_public', False)
 
     @property
     def name(self):
@@ -33,6 +35,13 @@ class Picture:
     @property
     def action(self):
         return self._action
+
+    @property
+    def is_public(self):
+        """
+        bool: indicates if the picture has been exported publicly
+        """
+        return self._is_public
 
     def _reject(self):
         self._action = "reject"
@@ -120,8 +129,17 @@ def displayable(file_name):
 
 def load_pictures(root: str, mode: Mode) -> deque:
     """
+    Parse picture directory.
+
     Parse directory tree for pictures and sort them into categories.
     Return a deque containing all pictures sorted by their names.
+
+    Args:
+        root: path to the root of the directory tree for the pictures
+        mode: mode of the application, so that only necessary pictures are loaded
+
+    Returns:
+        deque: double ended queue of picture objects
     """
 
     # paths of subdirectories
@@ -145,9 +163,12 @@ def load_pictures(root: str, mode: Mode) -> deque:
                 picture_names.add(name)
 
         for name in sorted(list(picture_names)):
+            exported_to_public = any(name in pic for pic in os.listdir(
+                os.path.join(export_path, 'public')))
+
             pictures.append(
                 Picture(name, find_jpg(os.path.join(src_path, "jpg"), name),
-                        mode))
+                        mode, is_public=exported_to_public))
 
     if mode == Mode.EDITING:
         edit_path = os.path.join(root, 'edit')
@@ -155,9 +176,14 @@ def load_pictures(root: str, mode: Mode) -> deque:
         for directory in os.listdir(edit_path):
             picture_names.add(directory)
             for picture in os.listdir(os.path.join(edit_path, directory)):
+                exported_to_public = any(directory in pic for pic in os.listdir(
+                    os.path.join(export_path, 'public')))
+
                 preview = os.path.join(edit_path, directory,
                                        picture) if displayable(picture) else ""
-                pictures.append(Picture(picture, preview, mode))
+
+                pictures.append(Picture(picture, preview, mode,
+                                        exported_to_public=exported_to_public))
 
     if mode == Mode.VIEW_ALL:
         private_path = os.path.join(export_path, 'private')
